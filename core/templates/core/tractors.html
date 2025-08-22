@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>Состояние ПО тракторов</title>
+    <link rel="stylesheet" href="{% static 'css/cell_colors.css' %}">
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; text-align: center;}
+        th { background-color: #f2f2f2; text-align: center;}
+        .scrollable {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    {{ tractors_info|json_script:"tractors_info_response" }}
+    {{ components|json_script:"components_response" }}
+    <h1>Версии ПО тракторов</h1>
+    <table class="tractor_list_table">
+        <thead>
+            <tr>
+                <th rowspan="3" scope="col">№ Трактора</th>
+                <th rowspan="3" scope="col">Модель трактора</th>
+                <th colspan="2" rowspan="2" scope="col">ДВС</th>
+                <th colspan="2" rowspan="2" scope="col">КП</th>
+                <th colspan="2" rowspan="2" scope="col">Рулевая колонка</th>
+                <th colspan="2" rowspan="2" scope="col">Распред</th>
+                <th colspan="4" scope="col">БК</th>
+            </tr>
+            <tr>
+                <th colspan="2" scope="col">Дисплей БК</th>
+                <th colspan="2" scope="col">Контроллер БК</th>
+            </tr>
+            <tr>
+                <th scope="col">Артикул</th>
+                <th scope="col">Версия ПО</th>
+                <th scope="col">Артикул</th>
+                <th scope="col">Версия ПО</th>
+                <th scope="col">Артикул</th>
+                <th scope="col">Версия ПО</th>
+                <th scope="col">Артикул</th>
+                <th scope="col">Версия ПО</th>
+                <th scope="col">Артикул</th>
+                <th scope="col">Версия ПО</th>
+                <th scope="col">Артикул</th>
+                <th scope="col">Версия ПО</th>
+            </tr>
+        </thead>
+        <tbody class="tractor_list_tbody">
+        </tbody>
+    </table>
+    <script src="{% static 'js/tractor_list.js' %}"></script>
+</body>
+</html>

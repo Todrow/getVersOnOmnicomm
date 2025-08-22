@@ -1,0 +1,147 @@
+from django.db import models
+
+# Все уникальные поля, а также поля связей - индексируются Django по умолчанию
+
+
+class Tractor(models.Model):
+    id = models.IntegerField(primary_key=True, null=False,
+                             verbose_name="ID in Omnicomm")
+    serial_number = models.CharField(
+        max_length=50, unique=True, verbose_name="Серийный номер"
+    )
+    name = models.CharField(max_length=100, verbose_name="Название")
+    # through - ссылка на промежуточную модель, которая обсепечивает связь Many2Many
+    components = models.ManyToManyField(
+        "Component", verbose_name="Компоненты", related_name="tractors", through="Assembly", through_fields=('tractor', 'component')
+    )
+    software_versions = models.ManyToManyField(
+        "SoftwareVersion", verbose_name='Версии прошивок', related_name="tractors", through="Assembly", through_fields=('tractor', 'software_version')
+    )
+
+    def __str__(self):
+        return f"{self.name} ({self.serial_number})"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name'])
+        ]
+
+
+class Component(models.Model):
+    NAMES_CHOICES = [
+        ('EN', 'ДВС'),
+        ('TB', 'Коробка передач'),
+        ('SC', 'Рулевая колонка'),
+        ('HD', 'Гидрораспределитель'),
+        ('DP', 'Дисплей'),
+        ('CN', 'Контроллер'),
+    ]
+    designation = models.CharField(max_length=100, unique=True,
+                                   verbose_name="Обозначение узла")
+    verbose_name = models.CharField(
+        max_length=2, choices=NAMES_CHOICES, unique=False, verbose_name="Название узла")
+
+    def __str__(self):
+        return self.designation
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['verbose_name'])
+        ]
+
+
+class SoftwareVersion(models.Model):
+    # Пообещали, что обозначение версии будет уникально для каждого артикула программы
+    component = models.ForeignKey(
+        Component, on_delete=models.CASCADE, verbose_name="Узел", related_name="versions")
+
+    tractor_model = models.CharField(
+        max_length=3, verbose_name="Модель трактора"
+    )
+    engine_comp = models.CharField(
+        max_length=3, verbose_name="Производитель ДВС"
+    )
+    first_number = models.PositiveSmallIntegerField(
+        verbose_name="Первые цифры в названии прошивки"
+    )
+    second_number = models.PositiveSmallIntegerField(
+        verbose_name="Вторые цифры в названии прошивки"
+    )
+    third_number = models.PositiveSmallIntegerField(
+        verbose_name="Третие цифры в названии прошивки"
+    )
+    is_critical = models.BooleanField(
+        default=False, verbose_name="Критическое обновление"
+    )
+    release_date = models.DateField(
+        verbose_name="Дата выпуска", null=True, blank=True
+    )
+
+    class Meta:
+        ordering = ['-release_date']
+        constraints = [models.UniqueConstraint(
+            fields=['tractor_model', 'engine_comp', 'first_number', 'second_number', 'third_number'], name='unique_version')
+        ]
+
+    # Собираем версию в читабельный вид
+    def get_version(self):
+        return f"{self.tractor_model}.{self.engine_comp}.{self.first_number}.{self.second_number}.{self.third_number}"
+
+    # Здесь и в __init__ делим строку версии на поля
+    def set_version(self, version):
+        parts = version.split('.')
+        if len(parts) == 5:
+            self.tractor_model = parts[0]
+            self.engine_comp = parts[1]
+            self.first_number = int(parts[2])
+            self.second_number = int(parts[3])
+            self.third_number = int(parts[4])
+        else:
+            raise ValueError(
+                "Версия должна содержать 5 компонентов, разделенных точками")
+
+    def __init__(self, *args, **kwargs):
+        version_str = kwargs.pop('version', None)
+        super().__init__(*args, **kwargs)
+        if version_str:
+            self.set_version(version_str)
+
+    def __str__(self):
+        return f"{self.component.designation}: {self.get_version()}"
+
+
+class Assembly(models.Model):  # Подумать над названием
+    tractor = models.ForeignKey(
+        Tractor, on_delete=models.CASCADE, verbose_name="Трактор", related_name="assamblies")
+    component = models.ForeignKey(
+        Component, on_delete=models.CASCADE, verbose_name="Узел", related_name="assamblies")
+    software_version = models.ForeignKey(
+        SoftwareVersion, on_delete=models.CASCADE, verbose_name="Нынешняя версия прошивки", related_name="assamblies")
+
+    class Meta:
+        verbose_name = "Сборка"
+        verbose_name_plural = "Сборки"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tractor", "component", "software_version"], name="unique_assembly")
+        ]
+
+
+# class Telemetry(models.Model):
+#     tractor = models.ForeignKey(
+#         Tractor, on_delete=models.CASCADE, verbose_name="Трактор")
+#     component = models.ForeignKey(
+#         Component, on_delete=models.CASCADE, verbose_name="Узел")
+#     installed_version = models.CharField(
+#         max_length=20, verbose_name="Установленная версия")
+#     timestamp = models.DateTimeField(
+#         auto_now_add=True, verbose_name="Время получения")
+
+#     class Meta:
+#         ordering = ['-timestamp']
+#         indexes = [
+#             models.Index(fields=['tractor', 'component']),
+#         ]
+
+#     def __str__(self):
+#         return f"{self.tractor} - {self.component}: {self.installed_version}"
