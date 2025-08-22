@@ -13,26 +13,37 @@ def tractor_list(request):
         components_info = [{'name': '—', 'designation_comp': '—',
                             'version': '—', 'status': 'gray'}]*6
         for eachVersion in eachTractor.software_versions.all():
-            thisversions = SoftwareVersion.objects.filter(tractor_model=eachVersion.tractor_model, engine_comp=eachVersion.engine_comp,
-                                                            first_number=eachVersion.first_number).order_by('-release_date')
-            status = 'green'
-            for otherVersion in thisversions:
-                if otherVersion.second_number == eachVersion.second_number and otherVersion.third_number > eachVersion.third_number:
-                    if otherVersion.is_critical:
-                        status = 'crirtical_old'
-                        break
-                    else:
-                        status = 'old'
-                if otherVersion.second_number > eachVersion.second_number:
-                    if otherVersion.is_critical:
-                        status = 'crirtical_old'
-                        break
-                    else:
-                        status = 'old'
-            if eachVersion.is_broken:
-                status = 'broken'
+            if eachVersion.tractor_model is None or eachVersion.engine_comp is None or eachVersion.first_number is None or eachVersion.second_number is None or eachVersion.third_number is None:
+                thisversions = SoftwareVersion.objects.filter(component__designation=eachVersion.component.designation, release_date__gt=eachVersion.release_date).order_by('-release_date')
+                status = 'green'
+                if thisversions:
+                    for otherVersion in thisversions:
+                        if otherVersion.is_critical:
+                            status = 'crirtical_old'
+                            break
+                        else:
+                            status = 'old'
+            else:
+                thisversions = SoftwareVersion.objects.filter(tractor_model=eachVersion.tractor_model, engine_comp=eachVersion.engine_comp,
+                                                                first_number=eachVersion.first_number).order_by('-release_date')
+                status = 'green'
+                for otherVersion in thisversions:
+                    if otherVersion.second_number == eachVersion.second_number and otherVersion.third_number > eachVersion.third_number:
+                        if otherVersion.is_critical:
+                            status = 'crirtical_old'
+                            break
+                        else:
+                            status = 'old'
+                    if otherVersion.second_number > eachVersion.second_number:
+                        if otherVersion.is_critical:
+                            status = 'crirtical_old'
+                            break
+                        else:
+                            status = 'old'
+                if eachVersion.is_broken:
+                    status = 'broken'
             components_info[NAMES_CHOICES.index(eachVersion.component.verbose_name)] = {'name': eachVersion.component.verbose_name, 'designation_comp': eachVersion.component.designation,
-                                   'version': eachVersion.get_version(), 'status': status}
+                                   'version': eachVersion.version, 'status': status}
         tractors_info.append({'id': eachTractor.id, 'serial_number': eachTractor.serial_number,
                              'name': eachTractor.name, 'components': components_info})
     context = {'tractors_info': tractors_info,

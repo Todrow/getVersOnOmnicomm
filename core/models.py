@@ -54,23 +54,26 @@ class SoftwareVersion(models.Model):
     # Пообещали, что обозначение версии будет уникально для каждого артикула программы
     component = models.ForeignKey(
         Component, on_delete=models.CASCADE, verbose_name="Узел", related_name="versions")
+    # Полнотекстовое обозначение ПО
+    version = models.CharField(
+        max_length=50, verbose_name="Обозначение ПО", blank=True, null=True
+    )
     # Обозначене ПО
     tractor_model = models.CharField(
-        max_length=3, verbose_name="Модель трактора"
+        max_length=3, verbose_name="Модель трактора", blank=True, null=False, editable=False
     )
     engine_comp = models.CharField(
-        max_length=3, verbose_name="Производитель ДВС"
+        max_length=3, verbose_name="Производитель ДВС", blank=True, null=True, editable=False
     )
     first_number = models.PositiveSmallIntegerField(
-        verbose_name="Первые цифры в названии прошивки"
+        verbose_name="Первые цифры в названии прошивки", blank=True, null=True, editable=False
     )
     second_number = models.PositiveSmallIntegerField(
-        verbose_name="Вторые цифры в названии прошивки"
+        verbose_name="Вторые цифры в названии прошивки", blank=True, null=True, editable=False
     )
     third_number = models.PositiveSmallIntegerField(
-        verbose_name="Третие цифры в названии прошивки"
+        verbose_name="Третие цифры в названии прошивки", blank=True, null=True, editable=False
     )
-
     ### Вспомогательные поля ###
     # Критическое обновление, все версии до него считаются неисправными
     is_critical = models.BooleanField(
@@ -92,31 +95,11 @@ class SoftwareVersion(models.Model):
         ]
 
     # Собираем версию в читабельный вид
-    def get_version(self):
-        return f"{self.tractor_model}.{self.engine_comp}.{self.first_number}.{self.second_number}.{self.third_number}"
-
-    # Здесь и в __init__ делим строку версии на поля
-    def set_version(self, version):
-        parts = version.split('.')
-        if len(parts) == 5:
-            self.tractor_model = parts[0]
-            self.engine_comp = parts[1]
-            self.first_number = int(parts[2])
-            self.second_number = int(parts[3])
-            self.third_number = int(parts[4])
-        else:
-            raise ValueError(
-                "Версия должна содержать 5 компонентов, разделенных точками")
-
-    def __init__(self, *args, **kwargs):
-        version_str = kwargs.pop('version', None)
-        super().__init__(*args, **kwargs)
-        if version_str:
-            self.set_version(version_str)
+    # def get_version(self):
+    #     return f"{self.tractor_model}.{self.engine_comp}.{self.first_number}.{self.second_number}.{self.third_number}"
 
     def __str__(self):
         return f"{self.component.designation}: {self.get_version()}"
-
 
 class Assembly(models.Model):  # Подумать над названием
     tractor = models.ForeignKey(

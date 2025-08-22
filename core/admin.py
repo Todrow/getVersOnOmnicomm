@@ -18,8 +18,8 @@ class ComponentAdmin(admin.ModelAdmin):
 
 @admin.register(SoftwareVersion)
 class SoftwareVersionAdmin(admin.ModelAdmin):
-    list_display = ('component', 'tractor_model', 'engine_comp',
-                    'first_number', 'second_number', 'third_number', 'is_critical')
+    list_display = ('component', 'version', 'is_critical', 'is_broken', 'tractor_model', 'engine_comp',
+                    'first_number', 'second_number', 'third_number')
     list_filter = ('is_critical', 'component')
     search_fields = ('component__designation',
                      'component__verbose_name')
