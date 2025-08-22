@@ -13,15 +13,24 @@ def tractor_list(request):
         components_info = [{'name': '—', 'designation_comp': '—',
                             'version': '—', 'status': 'gray'}]*6
         for eachVersion in eachTractor.software_versions.all():
-            currentVersion = SoftwareVersion.objects.filter(tractor_model=eachVersion.tractor_model, engine_comp=eachVersion.engine_comp,
-                                                            first_number=eachVersion.first_number, second_number=eachVersion.second_number).order_by('-release_date').first()
-            status = 'gray'
-            if eachVersion.third_number != currentVersion.third_number:
-                status = 'yellow'
-                if currentVersion.is_critical:
-                    status = 'red'
-            else:
-                status = 'green'
+            thisversions = SoftwareVersion.objects.filter(tractor_model=eachVersion.tractor_model, engine_comp=eachVersion.engine_comp,
+                                                            first_number=eachVersion.first_number).order_by('-release_date')
+            status = 'green'
+            for otherVersion in thisversions:
+                if otherVersion.second_number == eachVersion.second_number and otherVersion.third_number > eachVersion.third_number:
+                    if otherVersion.is_critical:
+                        status = 'crirtical_old'
+                        break
+                    else:
+                        status = 'old'
+                if otherVersion.second_number > eachVersion.second_number:
+                    if otherVersion.is_critical:
+                        status = 'crirtical_old'
+                        break
+                    else:
+                        status = 'old'
+            if eachVersion.is_broken:
+                status = 'broken'
             components_info[NAMES_CHOICES.index(eachVersion.component.verbose_name)] = {'name': eachVersion.component.verbose_name, 'designation_comp': eachVersion.component.designation,
                                    'version': eachVersion.get_version(), 'status': status}
         tractors_info.append({'id': eachTractor.id, 'serial_number': eachTractor.serial_number,

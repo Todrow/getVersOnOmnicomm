@@ -54,7 +54,7 @@ class SoftwareVersion(models.Model):
     # Пообещали, что обозначение версии будет уникально для каждого артикула программы
     component = models.ForeignKey(
         Component, on_delete=models.CASCADE, verbose_name="Узел", related_name="versions")
-
+    # Обозначене ПО
     tractor_model = models.CharField(
         max_length=3, verbose_name="Модель трактора"
     )
@@ -70,9 +70,17 @@ class SoftwareVersion(models.Model):
     third_number = models.PositiveSmallIntegerField(
         verbose_name="Третие цифры в названии прошивки"
     )
+
+    ### Вспомогательные поля ###
+    # Критическое обновление, все версии до него считаются неисправными
     is_critical = models.BooleanField(
         default=False, verbose_name="Критическое обновление"
     )
+    # Неисправная версия
+    is_broken = models.BooleanField(
+        default=False, verbose_name="Неисправная версия",
+    )
+    # Дата выпуска ПО
     release_date = models.DateField(
         verbose_name="Дата выпуска", null=True, blank=True
     )
