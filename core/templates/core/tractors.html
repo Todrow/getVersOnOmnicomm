@@ -12,12 +12,15 @@
             overflow-x: auto;
         }
     </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
 </head>
 <body>
     {{ tractors_info|json_script:"tractors_info_response" }}
     {{ components|json_script:"components_response" }}
     <h1>Версии ПО тракторов</h1>
-    <table class="tractor_list_table">
+    <table class="tractor_list_table", id="tractor_list_table">
         <thead>
             <tr>
                 <th rowspan="3" scope="col">№ Трактора</th>
@@ -51,5 +54,14 @@
         </tbody>
     </table>
     <script src="{% static 'js/tractor_list.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+        $('#tractor_list_table').DataTable({
+            "pageLength": 10,
+            "ordering": true, // Включение сортировки
+            "searching": true, // Включение фильтрации
+        });
+        });
+    </script>
 </body>
 </html>
