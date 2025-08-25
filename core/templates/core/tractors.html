@@ -19,6 +19,26 @@
 <body>
     {{ tractors_info|json_script:"tractors_info_response" }}
     {{ components|json_script:"components_response" }}
+    <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            {% comment %} <a itemprop="item" href="{% url 'tractor-list' %}"> {% endcomment %}
+            <span itemprop="name">Список тракторов</span>
+            {% comment %} </a> {% endcomment %}
+            <meta itemprop="position" content="1" />
+        </li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a itemprop="item" href="{% url 'component-create' %}">
+            <span itemprop="name">Добавление узла</span>
+            </a>
+            <meta itemprop="position" content="2" />
+        </li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a itemprop="item" href="{% url 'software-create' %}">
+            <span itemprop="name">Добавление версии ПО</span>
+            </a>
+            <meta itemprop="position" content="3" />
+        </li>
+    </ol>
     <h1>Версии ПО тракторов</h1>
     <table class="tractor_list_table", id="tractor_list_table">
         <thead>

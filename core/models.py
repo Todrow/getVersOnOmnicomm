@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import datetime
 
 # Все уникальные поля, а также поля связей - индексируются Django по умолчанию
 
@@ -39,7 +40,7 @@ class Component(models.Model):
     designation = models.CharField(max_length=100, unique=True,
                                    verbose_name="Обозначение узла")
     verbose_name = models.CharField(
-        max_length=2, choices=NAMES_CHOICES, unique=False, verbose_name="Название узла")
+        max_length=2, choices=NAMES_CHOICES, unique=False, verbose_name="Узел")
 
     def __str__(self):
         return self.designation
@@ -51,7 +52,6 @@ class Component(models.Model):
 
 
 class SoftwareVersion(models.Model):
-    # Пообещали, что обозначение версии будет уникально для каждого артикула программы
     component = models.ForeignKey(
         Component, on_delete=models.CASCADE, verbose_name="Узел", related_name="versions")
     # Полнотекстовое обозначение ПО
@@ -60,19 +60,19 @@ class SoftwareVersion(models.Model):
     )
     # Обозначене ПО
     tractor_model = models.CharField(
-        max_length=3, verbose_name="Модель трактора", blank=True, null=False, editable=False
+        max_length=3, verbose_name="Модель трактора", blank=True, null=True
     )
     engine_comp = models.CharField(
-        max_length=3, verbose_name="Производитель ДВС", blank=True, null=True, editable=False
+        max_length=3, verbose_name="Производитель ДВС", blank=True, null=True
     )
     first_number = models.PositiveSmallIntegerField(
-        verbose_name="Первые цифры в названии прошивки", blank=True, null=True, editable=False
+        verbose_name="Первые цифры в названии прошивки", blank=True, null=True
     )
     second_number = models.PositiveSmallIntegerField(
-        verbose_name="Вторые цифры в названии прошивки", blank=True, null=True, editable=False
+        verbose_name="Вторые цифры в названии прошивки", blank=True, null=True
     )
     third_number = models.PositiveSmallIntegerField(
-        verbose_name="Третие цифры в названии прошивки", blank=True, null=True, editable=False
+        verbose_name="Третие цифры в названии прошивки", blank=True, null=True
     )
     ### Вспомогательные поля ###
     # Критическое обновление, все версии до него считаются неисправными
@@ -85,7 +85,7 @@ class SoftwareVersion(models.Model):
     )
     # Дата выпуска ПО
     release_date = models.DateField(
-        verbose_name="Дата выпуска", null=True, blank=True
+        verbose_name="Дата выпуска", null=True, blank=True, default=datetime.now
     )
 
     class Meta:
@@ -94,12 +94,9 @@ class SoftwareVersion(models.Model):
             fields=['tractor_model', 'engine_comp', 'first_number', 'second_number', 'third_number'], name='unique_version')
         ]
 
-    # Собираем версию в читабельный вид
-    # def get_version(self):
-    #     return f"{self.tractor_model}.{self.engine_comp}.{self.first_number}.{self.second_number}.{self.third_number}"
 
     def __str__(self):
-        return f"{self.component.designation}: {self.get_version()}"
+        return f"{self.component.designation}: {self.version}"
 
 class Assembly(models.Model):  # Подумать над названием
     tractor = models.ForeignKey(
