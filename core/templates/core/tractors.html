@@ -76,11 +76,76 @@
     <script src="{% static 'js/tractor_list.js' %}"></script>
     <script>
         $(document).ready(function() {
-        $('#tractor_list_table').DataTable({
-            "pageLength": 10,
-            "ordering": true, // Включение сортировки
-            "searching": true, // Включение фильтрации
-        });
+            // Плагин сортировки по цвету
+            $.fn.dataTable.ext.type.order['color-pre'] = function(d) {
+                switch (d) {
+                    case 'broken': return 1;
+                    case 'crirtical_old': return 2;
+                    case 'old': return 3;
+                    case 'green': return 4;
+                    default: return 5;
+                }
+            };
+            // Инициализация DataTable с пользовательской сортировкой
+            var table = $('#tractor_list_table').DataTable({
+                "pageLength": 10,
+                "ordering": true,
+                "searching": true,
+            });
+            // Добавляем выпадающий список для фильтрации по цвету
+            {% comment %} $('.dataTables_filter').before(
+                '<div class="color-filter" style="margin-bottom: 10px;">' +
+                    '<label>Фильтр по цвету: </label>' +
+                    '<select id="colorFilter">' +
+                        '<option value="all">Все цвета</option>' +
+                        '<option value="broken">Неисправные версии</option>' +
+                        '<option value="crirtical_old">До major`ные версии</option>' +
+                        '<option value="old">minor-устаревшие версии</option>' +
+                        '<option value="green">Зелёные</option>' +
+                    '</select>' +
+                '</div>'
+            );
+            // Обработчик для фильтрации по цвету
+            $('#colorFilter').on('change', function() {
+                var color = this.value;
+                if (color) {
+                    // Ищем ячейки с указанным цветом
+                    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                        if (color == 'all'){
+                            console.log(color)
+                        }
+                        var row = table.row(dataIndex).node();
+                        var hasColor = ($(row).find('td[data-color="' + color + '"]').length > 0);
+                        return hasColor;
+                    });
+                } else {
+                    // Сбрасываем фильтр
+                    $.fn.dataTable.ext.search.pop();
+                }
+                
+                table.draw();
+            });
+            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                var searchTerm = table.search().toLowerCase();
+                var row = table.row(dataIndex).node();
+                console.log(searchTerm);
+
+                if (searchTerm == 'неисправные' || searchTerm == 'broken') {
+                    return $(row).find('data-color="broken"').length > 0;
+                }
+                if (searchTerm == 'критически устаревшие' || searchTerm == 'crirtical old' || searchTerm == 'major') {
+                    return $(row).find('data-color="crirtical_old"').length > 0;
+                }
+                if (searchTerm == 'устаревшие' || searchTerm == 'old' || searchTerm == 'minor') {
+                    return $(row).find('data-color="old"').length > 0;
+                }
+                if (searchTerm == 'зелёные' || searchTerm == 'green' || searchTerm == 'зеленые') {
+                    return $(row).find('data-color="green"').length > 0;
+                }
+                
+                return true;
+            });
+            table.draw();{% endcomment %}
         });
     </script>
 </body>

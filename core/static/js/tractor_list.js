@@ -26,7 +26,8 @@ for (let tractor of tractors_info_response) {
         td = document.createElement('td');
         version = tractor['components'][i]['version'];
         td.textContent = version;
-        td.classList.add(tractor['components'][i]['status'])
+        td.classList.add(tractor['components'][i]['status']);
+        td.dataset.color = tractor['components'][i]['status'];
         tr.appendChild(td);
     }
     tbody.appendChild(tr);

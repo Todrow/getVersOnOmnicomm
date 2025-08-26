@@ -75,6 +75,10 @@ class SoftwareVersion(models.Model):
         verbose_name="Третие цифры в названии прошивки", blank=True, null=True
     )
     ### Вспомогательные поля ###
+    # Примечание
+    note = models.CharField(
+        max_length=255, verbose_name="Примечание", blank=True, null=True
+    )
     # Критическое обновление, все версии до него считаются неисправными
     is_critical = models.BooleanField(
         default=False, verbose_name="Критическое обновление"
