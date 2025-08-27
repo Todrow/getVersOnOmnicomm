@@ -16,7 +16,7 @@ def search_status_versions(tractors):
         for eachVersion in eachTractor.software_versions.all():
             if eachVersion.tractor_model is None:
                 thisversions = SoftwareVersion.objects.filter(
-                    eachVersion.component.designation).order_by('-version')
+                    component__designation = eachVersion.component.designation).order_by('-version')
                 status = 'gray'
                 if eachVersion.version == thisversions.first().version:
                     status = 'green'
@@ -95,7 +95,7 @@ class SoftwareVersionCreateView(CreateView):
     model = SoftwareVersion
     form_class = SoftwareVersionForm
     template_name = 'core/software_version_create_form.html'
-    success_url = '/tractors/'
+    success_url = '/software_create/'
 
     def form_valid(self, form):
         form.instance.is_critical = (
@@ -107,5 +107,6 @@ class ComponentCreateView(CreateView):
     models = Component
     form_class = ComponentForm
     template_name = 'core/component_create_form.html'
+    success_url = '/component_create/'
 
     
