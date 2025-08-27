@@ -48,3 +48,12 @@ class ComponentForm(forms.ModelForm):
     class Meta:
         model = Component
         fields = '__all__'
+
+
+class StatusForm(forms.Form):
+    status = forms.ChoiceField(
+        choices=[(0, 'Все'), (1, 'Неисправные трактора'), (2, 'Критически устаревшие трактора (major)'),
+                 (3, 'Не критически устаревшие трактора(minor)')],
+        label='Статус трактора',
+        initial='Все'
+    )

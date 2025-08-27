@@ -2,7 +2,8 @@
 const tractors_info_response = JSON.parse(document.getElementById('tractors_info_response').textContent);
 // Получаем данные по компонентам из Django
 const components_response = JSON.parse(document.getElementById('components_response').textContent);
-
+// console.log(tractors_info_response)
+// console.log(components_response)
 // Таблица
 const table = document.getElementsByClassName('tractor_list_table')[0];
 const tbody = document.getElementsByClassName('tractor_list_tbody')[0];

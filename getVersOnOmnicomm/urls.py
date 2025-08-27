@@ -20,7 +20,7 @@ from core import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('tractors/', views.tractor_list, name='tractor-list'),
+    path('tractors/', views.filtredTableView, name='tractor-list'),
     path('software_create/', views.SoftwareVersionCreateView.as_view(),
          name='software-create'),
     path('component_create/', views.ComponentCreateView.as_view(),

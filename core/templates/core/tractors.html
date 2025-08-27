@@ -21,9 +21,7 @@
     {{ components|json_script:"components_response" }}
     <ol itemscope itemtype="https://schema.org/BreadcrumbList">
         <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-            {% comment %} <a itemprop="item" href="{% url 'tractor-list' %}"> {% endcomment %}
             <span itemprop="name">Список тракторов</span>
-            {% comment %} </a> {% endcomment %}
             <meta itemprop="position" content="1" />
         </li>
         <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
@@ -39,6 +37,22 @@
             <meta itemprop="position" content="3" />
         </li>
     </ol>
+    <form method="post">
+        {% csrf_token %}
+        <div>
+        {{ form.status }}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const select = document.querySelector('#id_status');
+                if (select) {
+                    select.addEventListener('change', function() {
+                        this.form.submit();
+                    });
+                }
+            });
+        </script>
+        </div>
+    </form>
     <h1>Версии ПО тракторов</h1>
     <table class="tractor_list_table", id="tractor_list_table">
         <thead>

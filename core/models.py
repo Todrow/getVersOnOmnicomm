@@ -93,7 +93,7 @@ class SoftwareVersion(models.Model):
     )
 
     class Meta:
-        ordering = ['-release_date']
+        ordering = ['-release_date', '-version']
         constraints = [models.UniqueConstraint(
             fields=['tractor_model', 'engine_comp', 'first_number', 'second_number', 'third_number'], name='unique_version')
         ]
