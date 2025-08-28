@@ -56,6 +56,7 @@ def search_status_versions(tractors):
                             status = 'old'
             if eachVersion.is_broken:
                 status = 'broken'
+                tractor_status = 'broken'
             components_info[NAMES_CHOICES.index(eachVersion.component.verbose_name)] = {'name': eachVersion.component.verbose_name, 'designation_comp': eachVersion.component.designation,
                                                                                         'version': eachVersion.version, 'status': status}
         tractors_info.append({'id': eachTractor.id, 'serial_number': eachTractor.serial_number,
@@ -68,7 +69,6 @@ def filtredTableView(request):
         form = StatusForm(request.POST)
         tractors = []
         if form.is_valid():
-            st = form.cleaned_data
             if form.cleaned_data['status'] == '0':
                 tractors = search_status_versions(Tractor.objects.all())
             elif form.cleaned_data['status'] == '1':
@@ -76,7 +76,7 @@ def filtredTableView(request):
                     software_versions__is_broken=True))
             elif form.cleaned_data['status'] == '2':
                 tractors = list(filter(
-                    lambda x: x['tractor_status'] == 'critical_old', search_status_versions(Tractor.objects.all())))
+                    lambda x: x['tractor_status'] == 'critical_old' or x['tractor_status'] == 'broken', search_status_versions(Tractor.objects.all())))
             elif form.cleaned_data['status'] == '3':
                 tractors = list(
                     filter(lambda x: x['tractor_status'] == 'old', search_status_versions(Tractor.objects.all())))
