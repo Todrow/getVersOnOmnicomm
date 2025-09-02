@@ -20,6 +20,7 @@ class SoftwareVersionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.pk:
             self.initial['is_critical'] = self.instance.is_critical
+        self.fields['is_broken'].widget = forms.HiddenInput()
 
     def clean(self):
         cleaned_data = super().clean()
