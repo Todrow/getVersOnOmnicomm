@@ -1,0 +1,35 @@
+.green {
+    background-color: #90EE90;
+}
+
+.old {
+    background-color: #FFFFE0;
+}
+
+.critical_old {
+    background-color: #ff5e00;
+}
+
+.broken {
+    background-color: #ff5e00;
+}
+
+.gray {
+    background-color: #f0f0f0;
+}
+
+.color-block{
+    width: 30px;
+    height: 30px;
+}
+
+.des-ul{
+    display: flex;
+    justify-content: space-evenly;
+    list-style: none;
+}
+
+.des-li{
+    display: flex;
+    align-items: center;
+}

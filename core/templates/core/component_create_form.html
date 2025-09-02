@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>Состояние ПО тракторов</title>
+    <link rel="stylesheet" href="{% static 'css/cell_colors.css' %}">
+    <style>
+        .scrollable {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a itemprop="item" href="{% url 'tractor-list' %}">
+            <span itemprop="name">Список тракторов</span>
+            </a>
+            <meta itemprop="position" content="1" />
+        </li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            {% comment %} <a itemprop="item" href="{% url 'component-create' %}"> {% endcomment %}
+            <span itemprop="name">Добавление узла</span>
+            {% comment %} </a> {% endcomment %}
+            <meta itemprop="position" content="2" />
+        </li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a itemprop="item" href="{% url 'software-create' %}">
+            <span itemprop="name">Добавление версии ПО</span>
+            </a>
+            <meta itemprop="position" content="3" />
+        </li>
+    </ol>
+    <h1>Добавление узла</h1>
+    <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Сохранить</button>
+</form>
+</body>
+</html>

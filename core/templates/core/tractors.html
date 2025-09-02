@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>Состояние ПО тракторов</title>
+    <link rel="stylesheet" href="{% static 'css/cell_colors.css' %}">
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; text-align: center;}
+        th { background-color: #f2f2f2; text-align: center;}
+        .scrollable {
+            overflow-x: auto;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+</head>
+<body>
+    {{ tractors_info|json_script:"tractors_info_response" }}
+    {{ components|json_script:"components_response" }}
+    <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <span itemprop="name">Список тракторов</span>
+            <meta itemprop="position" content="1" />
+        </li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a itemprop="item" href="{% url 'component-create' %}">
+            <span itemprop="name">Добавление узла</span>
+            </a>
+            <meta itemprop="position" content="2" />
+        </li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a itemprop="item" href="{% url 'software-create' %}">
+            <span itemprop="name">Добавление версии ПО</span>
+            </a>
+            <meta itemprop="position" content="3" />
+        </li>
+    </ol>
+    <form method="post">
+        {% csrf_token %}
+        <div>
+        {{ form.status }}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const select = document.querySelector('#id_status');
+                if (select) {
+                    select.addEventListener('change', function() {
+                        this.form.submit();
+                    });
+                }
+            });
+        </script>
+        </div>
+    </form>
+    <h1>Версии ПО тракторов</h1>
+    <ul class="des-ul">
+        <li class="des-li">
+            <div class="color-block green"></div>
+            <span>Актуальная версия</span>
+        </li>
+        <li class="des-li">
+            <div class="color-block old"></div>
+            <span>Устаревшая версия</span>
+        </li>
+        <li class="des-li">
+            <div class="color-block critical_old"></div>
+            <span>Критически устаревшая версия</span>
+        </li>
+    </ul>
+    <table class="tractor_list_table", id="tractor_list_table">
+        <thead>
+            <tr>
+                <th rowspan="3" scope="col">№ Трактора</th>
+                <th rowspan="3" scope="col">Модель трактора</th>
+                <th colspan="2" rowspan="2" scope="col">ДВС</th>
+                <th colspan="2" rowspan="2" scope="col">КП</th>
+                <th colspan="2" rowspan="2" scope="col">Рулевая колонка</th>
+                <th colspan="2" rowspan="2" scope="col">Распред</th>
+                <th colspan="4" scope="col">БК</th>
+            </tr>
+            <tr>
+                <th colspan="2" scope="col">Дисплей БК</th>
+                <th colspan="2" scope="col">Контроллер БК</th>
+            </tr>
+            <tr>
+                <th scope="col">Артикул</th>
+                <th scope="col">Версия ПО</th>
+                <th scope="col">Артикул</th>
+                <th scope="col">Версия ПО</th>
+                <th scope="col">Артикул</th>
+                <th scope="col">Версия ПО</th>
+                <th scope="col">Артикул</th>
+                <th scope="col">Версия ПО</th>
+                <th scope="col">Артикул</th>
+                <th scope="col">Версия ПО</th>
+                <th scope="col">Артикул</th>
+                <th scope="col">Версия ПО</th>
+            </tr>
+        </thead>
+        <tbody class="tractor_list_tbody">
+        </tbody>
+    </table>
+    <script src="{% static 'js/tractor_list.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            // Плагин сортировки по цвету
+            $.fn.dataTable.ext.type.order['color-pre'] = function(d) {
+                switch (d) {
+                    case 'broken': return 1;
+                    case 'crirtical_old': return 2;
+                    case 'old': return 3;
+                    case 'green': return 4;
+                    default: return 5;
+                }
+            };
+            // Инициализация DataTable с пользовательской сортировкой
+            var table = $('#tractor_list_table').DataTable({
+                "pageLength": 10,
+                "ordering": true,
+                "searching": true,
+            });
+            // Добавляем выпадающий список для фильтрации по цвету
+            {% comment %} $('.dataTables_filter').before(
+                '<div class="color-filter" style="margin-bottom: 10px;">' +
+                    '<label>Фильтр по цвету: </label>' +
+                    '<select id="colorFilter">' +
+                        '<option value="all">Все цвета</option>' +
+                        '<option value="broken">Неисправные версии</option>' +
+                        '<option value="crirtical_old">До major`ные версии</option>' +
+                        '<option value="old">minor-устаревшие версии</option>' +
+                        '<option value="green">Зелёные</option>' +
+                    '</select>' +
+                '</div>'
+            );
+            // Обработчик для фильтрации по цвету
+            $('#colorFilter').on('change', function() {
+                var color = this.value;
+                if (color) {
+                    // Ищем ячейки с указанным цветом
+                    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                        if (color == 'all'){
+                            console.log(color)
+                        }
+                        var row = table.row(dataIndex).node();
+                        var hasColor = ($(row).find('td[data-color="' + color + '"]').length > 0);
+                        return hasColor;
+                    });
+                } else {
+                    // Сбрасываем фильтр
+                    $.fn.dataTable.ext.search.pop();
+                }
+                
+                table.draw();
+            });
+            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                var searchTerm = table.search().toLowerCase();
+                var row = table.row(dataIndex).node();
+                console.log(searchTerm);
+
+                if (searchTerm == 'неисправные' || searchTerm == 'broken') {
+                    return $(row).find('data-color="broken"').length > 0;
+                }
+                if (searchTerm == 'критически устаревшие' || searchTerm == 'crirtical old' || searchTerm == 'major') {
+                    return $(row).find('data-color="crirtical_old"').length > 0;
+                }
+                if (searchTerm == 'устаревшие' || searchTerm == 'old' || searchTerm == 'minor') {
+                    return $(row).find('data-color="old"').length > 0;
+                }
+                if (searchTerm == 'зелёные' || searchTerm == 'green' || searchTerm == 'зеленые') {
+                    return $(row).find('data-color="green"').length > 0;
+                }
+                
+                return true;
+            });
+            table.draw();{% endcomment %}
+        });
+    </script>
+</body>
+</html>
