@@ -5,7 +5,6 @@ from django.views.generic.edit import CreateView
 from .forms import SoftwareVersionForm, ComponentForm, StatusForm
 from .models import Tractor, Component, SoftwareVersion, Assembly
 
-
 def search_status_versions(tractors):
     tractors_info = []
     NAMES_CHOICES = ['EN', 'TB', 'SC', 'HD', 'DP', 'CN']
